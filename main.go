@@ -21,6 +21,9 @@ func newRouter() *gin.Engine {
 	r.GET("/hello", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Hello from Gin"})
 	})
+	r.GET("/version", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"version": "1.0.0"})
+	})
 	r.GET("/items/:id", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"id": c.Param("id")})
 	})
