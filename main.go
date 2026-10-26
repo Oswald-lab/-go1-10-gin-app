@@ -54,6 +54,17 @@ func (s *userStore) create(u user) user {
 	return u
 }
 
+func (s *userStore) findByEmail(email string) (user, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, u := range s.users {
+		if u.Email == email {
+			return u, true
+		}
+	}
+	return user{}, false
+}
+
 func (s *userStore) update(id int, u user) (user, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -102,6 +113,19 @@ func newRouter() *gin.Engine {
 	})
 
 	users := newUserStore()
+	r.GET("/fetch/user", func(c *gin.Context) {
+		email := c.Query("email")
+		if email == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "email is required"})
+			return
+		}
+		u, ok := users.findByEmail(email)
+		if !ok {
+			c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+		c.JSON(http.StatusOK, u)
+	})
 	r.GET("/users", func(c *gin.Context) {
 		c.JSON(http.StatusOK, users.list())
 	})
